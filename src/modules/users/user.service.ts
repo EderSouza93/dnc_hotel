@@ -5,11 +5,14 @@ import { User } from "@prisma/client";
 @Injectable()
 export class UserService {
     constructor(private readonly prisma: PrismaService) {}
-
+    
     createUser(body: any): Promise<User> {
         return this.prisma.user.create({data: body});
     }
-    getUsers() {
-        return 'All users';
+    list() {
+        return this.prisma.user.findMany();
+    }
+    show(id: string) {
+        return this.prisma.user.findUnique({ where: { id: Number(id)  }});
     }
 }
