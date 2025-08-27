@@ -1,7 +1,8 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Patch, Post } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { CreateUserDTO } from "./domain/dto/createUser.dto";
 import { UpdateUserDto } from "./domain/dto/updateUser.dto";
+import { ParamId } from "src/shared/decorators/paramId.decorator";
 
 // Comentário para fixação.
 
@@ -30,7 +31,7 @@ export class UserController {
     }
 
     @Get(':id')
-    show(@Param('id', ParseIntPipe) id: number) {
+    show(@ParamId() id: number) {
         return this.userService.show(id);
     }
 
@@ -40,12 +41,12 @@ export class UserController {
     }
 
     @Patch(':id')
-    updateUser(@Param('id', ParseIntPipe) id: number, @Body() body: UpdateUserDto) {
+    updateUser(@ParamId() id: number, @Body() body: UpdateUserDto) {
         return this.userService.update(id, body);
     }
 
     @Delete(':id')
-    deleteUser(@Param('id', ParseIntPipe) id: number)  {
+    deleteUser(@ParamId() id: number)  {
         return this.userService.delete(id);
     }
 }
