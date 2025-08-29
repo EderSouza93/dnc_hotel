@@ -3,11 +3,16 @@ import { PrismaService } from "../prisma/prisma.service";
 import { User } from "@prisma/client";
 import { CreateUserDTO } from "./domain/dto/createUser.dto";
 import { UpdateUserDto } from "./domain/dto/updateUser.dto";
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
     constructor(private readonly prisma: PrismaService) {}
     
+    async create(body: CreateUserDTO): Promise<User> {
+        body.password = await this.hashPassword(body.password);
+        return await this.prisma.user.create({data: body});
+    }
     async list() {
         return await this.prisma.user.findMany();
     }
@@ -15,11 +20,12 @@ export class UserService {
         const user = await this.isIdExists(id);  
         return user
     }
-    async create(body: CreateUserDTO): Promise<User> {
-        return await this.prisma.user.create({data: body});
-    }
     async update(id: number, body: UpdateUserDto) {
         await this.isIdExists(id);
+
+        if (body.password) {
+            body.password = await this.hashPassword(body.password)
+        }
         return await this.prisma.user.update({ where: { id }, data: body });
     }
     async delete(id: number) {
@@ -37,5 +43,9 @@ export class UserService {
         }
 
         return user
+    }
+
+    private async hashPassword(password: string) {
+        return await bcrypt.hash(password, 10)
     }
 }
