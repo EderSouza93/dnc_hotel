@@ -5,7 +5,9 @@ import { UpdateUserDto } from "./domain/dto/updateUser.dto";
 import { ParamId } from "src/shared/decorators/paramId.decorator";
 import { AuthGuard } from "src/shared/guards/auth.guard";
 import { User } from "src/shared/decorators/user.decorator";
-import type { User as UserType } from '@prisma/client'
+import { Role, type User as UserType } from '@prisma/client'
+import { Roles } from "src/shared/decorators/roles.decorator";
+import { RoleGuard } from "src/shared/guards/role.guard";
 
 // Comentário para fixação.
 
@@ -23,32 +25,37 @@ import type { User as UserType } from '@prisma/client'
     É importado dessa forma:
     import { loggingInterceptor } from "src/shared/interceptors/logging.interceptor";
 */
-@UseGuards(AuthGuard)
+@UseGuards(AuthGuard, RoleGuard )
 @Controller('users')
 export class UserController {
     constructor(private userService: UserService) {}
 
+    @Roles(Role.USER, Role.ADMIN)
     @Get()
     list(@User() user: UserType) {
         console.log(user)
         return this.userService.list();
     }
 
+    @Roles(Role.USER, Role.ADMIN)
     @Get(':id')
     show(@ParamId() id: number) {
         return this.userService.show(id);
     }
 
+    @Roles(Role.ADMIN)
     @Post()
      createUser(@Body() body: CreateUserDTO) {
         return this.userService.create(body);  
     }
 
+    @Roles(Role.ADMIN)
     @Patch(':id')
     updateUser(@ParamId() id: number, @Body() body: UpdateUserDto) {
         return this.userService.update(id, body);
     }
 
+    @Roles(Role.ADMIN)
     @Delete(':id')
     deleteUser(@ParamId() id: number)  {
         return this.userService.delete(id);
