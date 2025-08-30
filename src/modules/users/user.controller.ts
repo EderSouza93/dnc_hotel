@@ -4,6 +4,8 @@ import { CreateUserDTO } from "./domain/dto/createUser.dto";
 import { UpdateUserDto } from "./domain/dto/updateUser.dto";
 import { ParamId } from "src/shared/decorators/paramId.decorator";
 import { AuthGuard } from "src/shared/guards/auth.guard";
+import { User } from "src/shared/decorators/user.decorator";
+import type { User as UserType } from '@prisma/client'
 
 // Comentário para fixação.
 
@@ -27,7 +29,8 @@ export class UserController {
     constructor(private userService: UserService) {}
 
     @Get()
-    list() {
+    list(@User() user: UserType) {
+        console.log(user)
         return this.userService.list();
     }
 
