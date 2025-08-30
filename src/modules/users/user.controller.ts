@@ -1,8 +1,9 @@
-import { Body, Controller, Delete, Get, Patch, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Patch, Post, UseGuards } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { CreateUserDTO } from "./domain/dto/createUser.dto";
 import { UpdateUserDto } from "./domain/dto/updateUser.dto";
 import { ParamId } from "src/shared/decorators/paramId.decorator";
+import { AuthGuard } from "src/shared/guards/auth.guard";
 
 // Comentário para fixação.
 
@@ -20,11 +21,11 @@ import { ParamId } from "src/shared/decorators/paramId.decorator";
     É importado dessa forma:
     import { loggingInterceptor } from "src/shared/interceptors/logging.interceptor";
 */
+@UseGuards(AuthGuard)
 @Controller('users')
 export class UserController {
     constructor(private userService: UserService) {}
 
-    
     @Get()
     list() {
         return this.userService.list();
