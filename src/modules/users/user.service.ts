@@ -10,7 +10,6 @@ import { userSelectFields } from "../prisma/utils/userSelectFields";
 export class UserService {
     constructor(private readonly prisma: PrismaService) {}
     
-    // Need to remove updateAt and password for dont show on response
     async create(body: CreateUserDTO): Promise<User> {
         body.password = await this.hashPassword(body.password);
         return await this.prisma.user.create({
