@@ -9,6 +9,7 @@ import { Role, type User as UserType } from '@prisma/client'
 import { Roles } from "src/shared/decorators/roles.decorator";
 import { RoleGuard } from "src/shared/guards/role.guard";
 import { UserMatchGuard } from "src/shared/guards/userMatch.guard";
+import { SkipThrottle, Throttle, ThrottlerGuard } from "@nestjs/throttler";
 
 // Comentário para fixação.
 
@@ -26,12 +27,12 @@ import { UserMatchGuard } from "src/shared/guards/userMatch.guard";
     É importado dessa forma:
     import { loggingInterceptor } from "src/shared/interceptors/logging.interceptor";
 */
-@UseGuards(AuthGuard, RoleGuard )
+@UseGuards(AuthGuard, RoleGuard, ThrottlerGuard )
 @Controller('users')
 export class UserController {
     constructor(private userService: UserService) {}
 
-    @Roles(Role.USER, Role.ADMIN)
+    @Roles(Role.ADMIN, Role.USER)
     @Get()
     list(@User() user: UserType) {
         console.log(user)
