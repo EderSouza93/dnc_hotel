@@ -1,12 +1,15 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
-import { loggingInterceptor } from './shared/interceptors/logging.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalPipes(new ValidationPipe)
-  app.useGlobalInterceptors(new loggingInterceptor)
+  app.enableCors({
+    origin: 'http://localhost:3001',
+    methods: 'GET,PATCH,POST,DELETE',
+  })
+  //app.useGlobalInterceptors(new loggingInterceptor())
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
