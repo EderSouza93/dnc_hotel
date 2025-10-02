@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
-import { User } from "@prisma/client";
+import { Role, User } from "@prisma/client";
 import { CreateUserDTO } from "./domain/dto/createUser.dto";
 import { UpdateUserDto } from "./domain/dto/updateUser.dto";
 import * as bcrypt from 'bcrypt';
@@ -8,6 +8,7 @@ import { userSelectFields } from "../prisma/utils/userSelectFields";
 
 @Injectable()
 export class UserService {
+    
     constructor(private readonly prisma: PrismaService) {}
     
     async create(body: CreateUserDTO): Promise<User> {
@@ -56,7 +57,15 @@ export class UserService {
         })
     }
 
+    async uploadAvatar() {
+        throw new Error("Method not implemented.");
+    }
+
     private async isIdExists(id: number) {
+
+        if (!id || isNaN(id)) {
+            throw new BadRequestException('Id inválido');
+        }
         const user = await this.prisma.user.findUnique({
             where: { id },
             select: userSelectFields

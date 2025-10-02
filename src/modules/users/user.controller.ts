@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Patch, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Patch, Post, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { CreateUserDTO } from "./domain/dto/createUser.dto";
 import { UpdateUserDto } from "./domain/dto/updateUser.dto";
@@ -9,7 +9,8 @@ import { Role, type User as UserType } from '@prisma/client'
 import { Roles } from "src/shared/decorators/roles.decorator";
 import { RoleGuard } from "src/shared/guards/role.guard";
 import { UserMatchGuard } from "src/shared/guards/userMatch.guard";
-import { SkipThrottle, Throttle, ThrottlerGuard } from "@nestjs/throttler";
+import { ThrottlerGuard } from "@nestjs/throttler";
+import { FileInterceptor } from "@nestjs/platform-express";
 
 // Comentário para fixação.
 
@@ -62,5 +63,14 @@ export class UserController {
     @Delete(':id')
     deleteUser(@ParamId() id: number)  {
         return this.userService.delete(id);
+    }
+
+    @UseInterceptors(FileInterceptor('avatar'))
+    @Roles(Role.ADMIN, Role.USER)
+    @Post('avatar')
+    uploadAvatar(@UploadedFile() avatar: Express.Multer.File) {
+        console.log(avatar);
+        return true;
+        //return this.userService.uploadAvatar(user)
     }
 }
