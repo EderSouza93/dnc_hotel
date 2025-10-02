@@ -68,9 +68,10 @@ export class UserController {
     @UseInterceptors(FileInterceptor('avatar'))
     @Roles(Role.ADMIN, Role.USER)
     @Post('avatar')
-    uploadAvatar(@UploadedFile() avatar: Express.Multer.File) {
-        console.log(avatar);
-        return true;
-        //return this.userService.uploadAvatar(user)
+    uploadAvatar(
+        @User('id') id: number, 
+        @UploadedFile() avatar: Express.Multer.File,
+    ) {
+        return this.userService.uploadAvatar(id, avatar.filename)
     }
 }
