@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Patch, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, FileTypeValidator, Get, MaxFileSizeValidator, ParseFilePipe, Patch, Post, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { CreateUserDTO } from "./domain/dto/createUser.dto";
 import { UpdateUserDto } from "./domain/dto/updateUser.dto";
@@ -9,7 +9,9 @@ import { Role, type User as UserType } from '@prisma/client'
 import { Roles } from "src/shared/decorators/roles.decorator";
 import { RoleGuard } from "src/shared/guards/role.guard";
 import { UserMatchGuard } from "src/shared/guards/userMatch.guard";
-import { SkipThrottle, Throttle, ThrottlerGuard } from "@nestjs/throttler";
+import { ThrottlerGuard } from "@nestjs/throttler";
+import { FileInterceptor } from "@nestjs/platform-express";
+import { FileValidationInterceptor } from "src/shared/interceptors/fileValidation.interceptor";
 
 // Comentário para fixação.
 
@@ -62,5 +64,28 @@ export class UserController {
     @Delete(':id')
     deleteUser(@ParamId() id: number)  {
         return this.userService.delete(id);
+    }
+
+    @UseInterceptors(FileInterceptor('avatar'), FileValidationInterceptor)
+    @Roles(Role.ADMIN, Role.USER)
+    @Post('avatar')
+    uploadAvatar(
+        @User('id') id: number, 
+        @UploadedFile(
+            new ParseFilePipe({
+                validators: [
+                    new FileTypeValidator({ 
+                        fileType: 'image/*',
+                        skipMagicNumbersValidation: true,
+                    }),
+                    new MaxFileSizeValidator({
+                        maxSize: 900 * 1024 // 900KB
+                    }),
+                ]
+            }), 
+        )
+    avatar: Express.Multer.File,
+    ) {
+        return this.userService.uploadAvatar(id, avatar.filename)
     }
 }

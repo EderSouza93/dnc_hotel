@@ -2,7 +2,6 @@ import { Injectable, UnauthorizedException } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
 import { Role, User } from "@prisma/client";
 import { AuthLoginDTO } from "./domain/dto/authLogin.dto";
-import { PrismaService } from "../prisma/prisma.service";
 import * as bcrypt from 'bcrypt';
 import { UserService } from "../users/user.service";
 import { CreateUserDTO } from "../users/domain/dto/createUser.dto";
@@ -63,7 +62,7 @@ export class AuthService {
 
         if (!valid || !decoded) throw new UnauthorizedException('Invalid token');
 
-        const user = await this.userService.update(Number(decoded.sub), { 
+        const user: User = await this.userService.update(Number(decoded.sub), { 
             password,
         });
 
