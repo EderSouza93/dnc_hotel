@@ -1,16 +1,24 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable, NotFoundException } from "@nestjs/common";
 import { PrismaService } from "../prisma/prisma.service";
-import { User } from "@prisma/client";
+import { Role, User } from "@prisma/client";
 import { CreateUserDTO } from "./domain/dto/createUser.dto";
 import { UpdateUserDto } from "./domain/dto/updateUser.dto";
 import * as bcrypt from 'bcrypt';
 import { userSelectFields } from "../prisma/utils/userSelectFields";
+import { join, resolve } from "path";
+import { stat, unlink } from "fs/promises";
+
 
 @Injectable()
 export class UserService {
+    
     constructor(private readonly prisma: PrismaService) {}
     
     async create(body: CreateUserDTO): Promise<User> {
+        const user = await this.findByEmail(body.email);
+        if (user) {
+            throw new BadRequestException('User already exists')
+        }
         body.password = await this.hashPassword(body.password);
         return await this.prisma.user.create({
             data: body,
@@ -52,7 +60,29 @@ export class UserService {
         })
     }
 
+    async uploadAvatar(id: number, avatarFilename: string) {
+        const user = await this.isIdExists(id);
+        const directory = resolve(__dirname, '..', '..','..','uploads');
+
+        if (user.avatar) {
+            const userAvatarFilePath = join(directory, user.avatar);
+            const userAvatarFileExists = await stat(userAvatarFilePath);
+
+            if (userAvatarFileExists) {
+                await unlink(userAvatarFilePath);
+            }
+        }
+
+        const userUpdated = await this.update(id, { avatar: avatarFilename });
+
+        return userUpdated;
+    }
+
     private async isIdExists(id: number) {
+
+        if (!id || isNaN(id)) {
+            throw new BadRequestException('Id inválido');
+        }
         const user = await this.prisma.user.findUnique({
             where: { id },
             select: userSelectFields

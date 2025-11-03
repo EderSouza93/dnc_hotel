@@ -7,19 +7,39 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  ADMIN
+  USER
+}
 model User {
   id        Int      @id @default(autoincrement())
   name      String
   email     String   @unique
   password  String
   role      Role     @default(USER)
+  avatar    String?
+  hotels    Hotel[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   @@map("users")
 }
 
-enum Role {
-  ADMIN
-  USER
+// 1 User pode ter vários hotéis
+// 1 : N
+
+model Hotel {
+  id          Int      @id @default(autoincrement())
+  name        String
+  description String
+  address     String
+  image       String?
+  price       Float
+  ownerId     Int
+  owner       User     @relation(fields: [ownerId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("hotels")
 }
+
