@@ -10,9 +10,11 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { HOTEL_REPOSITORY_TOKEN } from './utils/repositoriesTokens';
 import { FindByOwnerHotelsService } from './services/findByOwnerHotel.service';
 import { FindByNameHotelsService } from './services/findByNameHotel.service';
+import { AuthModule } from '../auth/auth.module';
+import { UserModule } from '../users/user.module';
 
 @Module({
-  imports: [PrismaModule],
+  imports: [PrismaModule, AuthModule, UserModule],
   controllers: [HotelsController],
   providers: 
   [
