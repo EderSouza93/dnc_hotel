@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Query, UseGuards, UploadedFile, ParseFilePipe, FileTypeValidator, MaxFileSizeValidator, UseInterceptors } from '@nestjs/common';
 import { CreateHotelsService } from '../services/createHotel.service';
 import { CreateHotelDto } from '../domain/dto/create-hotel.dto';
 import { UpdateHotelDto } from '../domain/dto/update-hotel.dto';
@@ -6,15 +6,18 @@ import { FindOneHotelsService } from '../services/findOneHotel.service';
 import { FindAllHotelsService } from '../services/findAllHotel.service';
 import { RemoveHotelsService } from '../services/removeHotel.service';
 import { UpdateHotelsService } from '../services/updateHotel.service';
-import { ParamId } from 'src/shared/decorators/paramId.decorator';
+import { UploadImageHotelsService } from '../services/uploadImageHotel.service';
 import { FindByOwnerHotelsService } from '../services/findByOwnerHotel.service';
 import { FindByNameHotelsService } from '../services/findByNameHotel.service';
+import { ParamId } from 'src/shared/decorators/paramId.decorator';
 import { AuthGuard } from 'src/shared/guards/auth.guard';
 import { RoleGuard } from 'src/shared/guards/role.guard';
 import { Roles } from 'src/shared/decorators/roles.decorator';
 import { Role } from '@prisma/client';
 import { OwnerHotelGuard } from 'src/shared/guards/ownerHotel.guard';
 import { User } from 'src/shared/decorators/user.decorator';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { FileValidationInterceptor } from 'src/shared/interceptors/fileValidation.interceptor';
 
 @UseGuards(AuthGuard, RoleGuard)
 @Controller('hotels')
@@ -27,6 +30,7 @@ export class HotelsController {
     private readonly updateHotelsService: UpdateHotelsService,
     private readonly findHotelByOwnerService: FindByOwnerHotelsService,
     private readonly findHotelByNameService: FindByNameHotelsService,
+    private readonly uploadImageHotelsService: UploadImageHotelsService
   ) {}
 
   @Roles(Role.ADMIN)
@@ -57,6 +61,27 @@ export class HotelsController {
   @Get(':id')
   findOne(@ParamId() id: number) {
     return this.findOneHotelsService.execute(id);
+  }
+
+  @UseInterceptors(FileInterceptor('image'), FileValidationInterceptor)
+  @Roles(Role.ADMIN)
+  @Patch('image/:hotelId')
+  uploadImage(
+    @Param('hotelId') id: string,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new FileTypeValidator({
+            fileType: "image/*",
+            skipMagicNumbersValidation: true,
+          }),
+          new MaxFileSizeValidator({ maxSize: 900 * 1024 })
+        ]
+      })
+    )
+    image: Express.Multer.File,
+  ) {
+    return this.uploadImageHotelsService.execute(id, image.filename)
   }
 
   @UseGuards(OwnerHotelGuard)
