@@ -11,6 +11,12 @@ enum Role {
   ADMIN
   USER
 }
+
+enum ReservationStatus {
+  PENDING
+  APPROVED
+  CANCELLED
+}
 model User {
   id            Int      @id @default(autoincrement())
   name          String
@@ -48,17 +54,17 @@ model Hotel {
 // N : N
 
 model Reservation {
-  id          Int       @id @default(autoincrement())
+  id          Int                 @id @default(autoincrement())
   userId      Int
-  user        User      @relation(fields: [userId], references: [id])
+  user        User                @relation(fields: [userId], references: [id])
   hotelId     Int
-  hotel       Hotel     @relation(fields: [hotelId], references: [id])
+  hotel       Hotel               @relation(fields: [hotelId], references: [id])
   checkIn     DateTime
   checkOut    DateTime
   total       Float
-  approved    Boolean   @default(false)
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  status      ReservationStatus   @default(PENDING)
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
 
   @@map("reservations")
 }
