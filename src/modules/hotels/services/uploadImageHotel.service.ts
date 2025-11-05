@@ -1,5 +1,5 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { HOTEL_REPOSITORY_TOKEN } from '../utils/repositoriesTokens';
+import { REPOSITORY_TOKEN_HOTEL } from '../utils/repositoriesTokens';
 import type { IHotelRepository } from '../domain/repositories/Ihotel.repositories';
 import { join, resolve } from 'path';
 import { stat, unlink } from 'fs/promises';
@@ -7,7 +7,7 @@ import { stat, unlink } from 'fs/promises';
 @Injectable()
 export class UploadImageHotelsService {
     constructor(
-      @Inject(HOTEL_REPOSITORY_TOKEN)
+      @Inject(REPOSITORY_TOKEN_HOTEL)
       private readonly hotelRepositories: IHotelRepository,
     ) { }
 

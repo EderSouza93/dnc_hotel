@@ -7,7 +7,7 @@ import { UpdateHotelsService } from './services/updateHotel.service';
 import { RemoveHotelsService } from './services/removeHotel.service';
 import { HotelsRepositories } from './infra/hotels.repository';
 import { PrismaModule } from '../prisma/prisma.module';
-import { HOTEL_REPOSITORY_TOKEN } from './utils/repositoriesTokens';
+import { REPOSITORY_TOKEN_HOTEL } from './utils/repositoriesTokens';
 import { FindByOwnerHotelsService } from './services/findByOwnerHotel.service';
 import { FindByNameHotelsService } from './services/findByNameHotel.service';
 import { AuthModule } from '../auth/auth.module';
@@ -43,7 +43,7 @@ import { UploadImageHotelsService } from './services/uploadImageHotel.service';
     RemoveHotelsService,
     UploadImageHotelsService,
     {
-      provide: HOTEL_REPOSITORY_TOKEN,
+      provide: REPOSITORY_TOKEN_HOTEL,
       useClass: HotelsRepositories,
     }
   ],
