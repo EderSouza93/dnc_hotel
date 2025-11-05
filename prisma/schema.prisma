@@ -43,3 +43,16 @@ model Hotel {
   @@map("hotels")
 }
 
+// N : N
+
+model Reservation {
+  id          Int       @id @default(autoincrement())
+  checkIn     DateTime
+  checkOut    DateTime
+  total       Float
+  approved    Boolean   @default(false)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@map("reservations")
+}
