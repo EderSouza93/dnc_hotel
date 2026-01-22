@@ -5,19 +5,32 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { AuthModule } from '../auth/auth.module';
 import { UserModule } from '../users/user.module';
 import { HotelsModule } from '../hotels/hotels.module';
-import { ReservationsRepository } from './infra/reservations.repository';
 import { REPOSITORY_TOKEN_RESERVATION } from './utils/repositoriesTokens';
-
+import { ReservationRepository } from './infra/reservations.repository';
+import { REPOSITORY_TOKEN_HOTEL } from '../hotels/utils/repositoriesTokens';
+import { HotelsRepositories } from '../hotels/infra/hotels.repository';
+import { FindAllReservationsService } from './services/findAllReservations.service';
+import { FindByIdReservationsService } from './services/findByIdReservations.service';
+import { FindByUserReservationsService } from './services/findByUserReservations.service';
+import { UpdateStatusReservationsService } from './services/updateStatusReservations.service';
 
 @Module({
   imports: [PrismaModule, AuthModule, UserModule, HotelsModule],
   controllers: [ReservationsController],
   providers: [
-    CreateReservationsService,
+    CreateReservationsService, 
+    FindAllReservationsService,
+    FindByIdReservationsService,
+    FindByUserReservationsService,
+    UpdateStatusReservationsService,
     {
       provide: REPOSITORY_TOKEN_RESERVATION,
-      useClass: ReservationsRepository
+      useClass: ReservationRepository,
+    },
+    {
+      provide: REPOSITORY_TOKEN_HOTEL,
+      useClass: HotelsRepositories
     }
   ],
 })
-export class ReservationsModule { }
+export class ReservationsModule {}

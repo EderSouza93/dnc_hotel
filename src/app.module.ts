@@ -26,6 +26,7 @@ import { ReservationsModule } from './modules/reservations/reservations.module';
       }
     }),
     HotelsModule,
+    ReservationsModule
     RedisModule.forRoot({
       type: 'single',
       url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
