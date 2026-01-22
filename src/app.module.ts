@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { RedisModule } from '@nestjs-modules/ioredis';
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { UserModule } from './modules/users/user.module';
 import { AuthModule } from './modules/auth/auth.module';
@@ -9,9 +10,9 @@ import { ReservationsModule } from './modules/reservations/reservations.module';
 
 @Module({
   imports: [
-    PrismaModule, 
-    UserModule, 
-    AuthModule, 
+    PrismaModule,
+    UserModule,
+    AuthModule,
     ThrottlerModule.forRoot([
       {
         ttl: 5000,
@@ -26,6 +27,12 @@ import { ReservationsModule } from './modules/reservations/reservations.module';
     }),
     HotelsModule,
     ReservationsModule
+    RedisModule.forRoot({
+      type: 'single',
+      url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
+    }),
+    ReservationsModule,
+
   ],
   providers: [
     {
@@ -34,4 +41,4 @@ import { ReservationsModule } from './modules/reservations/reservations.module';
     }
   ]
 })
-export class AppModule {}
+export class AppModule { }
