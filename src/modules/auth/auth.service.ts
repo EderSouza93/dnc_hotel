@@ -21,8 +21,9 @@ export class AuthService {
 
     async generateJwtToken(user: User, expiresIn: string = '1d') {
         const payload = { sub: user.id, name: user.name };
+        const expiresInSeconds = expiresIn === '1d' ? 86400 : parseInt(expiresIn) || 86400;
         const options = { 
-            expiresIn: expiresIn,
+            expiresIn: expiresInSeconds,
             issuer: 'dnc_hotel',
             audience: 'users',
         };

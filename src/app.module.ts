@@ -1,16 +1,18 @@
 import { Module } from '@nestjs/common';
+import { RedisModule } from '@nestjs-modules/ioredis';
 import { PrismaModule } from './modules/prisma/prisma.module';
 import { UserModule } from './modules/users/user.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HotelsModule } from './modules/hotels/hotels.module';
+import { ReservationsModule } from './modules/reservations/reservations.module';
 
 @Module({
   imports: [
-    PrismaModule, 
-    UserModule, 
-    AuthModule, 
+    PrismaModule,
+    UserModule,
+    AuthModule,
     ThrottlerModule.forRoot([
       {
         ttl: 5000,
@@ -23,7 +25,13 @@ import { HotelsModule } from './modules/hotels/hotels.module';
         from: `"dnc_hotel" <${process.env.EMAIL_USER}>`
       }
     }),
-    HotelsModule
+    HotelsModule,
+    RedisModule.forRoot({
+      type: 'single',
+      url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
+    }),
+    ReservationsModule,
+
   ],
   providers: [
     {
@@ -32,4 +40,4 @@ import { HotelsModule } from './modules/hotels/hotels.module';
     }
   ]
 })
-export class AppModule {}
+export class AppModule { }
