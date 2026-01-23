@@ -7,8 +7,8 @@
     {
       "type": "node",
       "request": "launch",
-      "name": "Debug NestJS via Yarn",
-      "runtimeExecutable": "yarn",
+      "name": "Debug NestJS via pnpm",
+      "runtimeExecutable": "pnpm",
       "runtimeArgs": ["start:debug"],
       "port": 9230,
       "skipFiles": ["<node_internals>/**"],
