@@ -1,12 +1,21 @@
 import { forwardRef, MiddlewareConsumer, Module, NestModule, RequestMethod } from "@nestjs/common";
-import { UserController } from "./user.controller";
-import { UserService } from "./user.service";
+import { UserController } from "./infra/user.controller";
 import { PrismaModule } from "../prisma/prisma.module";
 import { UserIdCheckMiddleware } from "src/shared/middlewares/userIdCheck.middleware";
 import { AuthModule } from "../auth/auth.module";
 import { MulterModule } from "@nestjs/platform-express";
 import { diskStorage } from "multer";
 import { v4 as uuidv4 } from "uuid";
+import { CreateUserService } from "./services/createUser.service";
+import { UserRepository } from "./infra/user.repository";
+import { REPOSITORY_TOKEN_USER } from "./utils/repositoriesTokens";
+import { ListUserService } from "./services/listUser.service";
+import { ShowUserService } from "./services/showUser.service";
+import { UpdateUserService } from "./services/updateUser.service";
+import { FindUserByEmail } from "./services/findUserByEmail.service";
+import { DeleteUserService } from "./services/deleteUser.service";
+import { UploadAvatarService } from "./services/uploadAvatar.service";
+import { UserMatchGuard } from "src/shared/guards/userMatch.guard";
 
 @Module({
     imports: [
@@ -23,17 +32,40 @@ import { v4 as uuidv4 } from "uuid";
         })
     ],
     controllers: [UserController],
-    providers: [UserService],
-    exports: [UserService],
+    providers: [
+        ListUserService,
+        ShowUserService,
+        UpdateUserService,
+        FindUserByEmail,
+        DeleteUserService,
+        UploadAvatarService,
+        CreateUserService,
+        UserMatchGuard, 
+        {
+            provide: REPOSITORY_TOKEN_USER,
+            useClass: UserRepository,
+        }
+        
+    ],
+    exports: [
+        CreateUserService,
+        ShowUserService,
+        FindUserByEmail,
+        UpdateUserService,
+        {
+            provide: REPOSITORY_TOKEN_USER,
+            useClass: UserRepository,
+        }
+    ],
 })
 export class UserModule implements NestModule {
     configure(consumer: MiddlewareConsumer) {
         consumer
             .apply(UserIdCheckMiddleware)
             .forRoutes(
-                { path: 'user/:id', method: RequestMethod.GET },
-                { path: 'user/:id', method: RequestMethod.PATCH },
-                { path: 'user/:id', method: RequestMethod.DELETE },
+                { path: 'users/:id', method: RequestMethod.GET },
+                { path: 'users/:id', method: RequestMethod.PATCH },
+                { path: 'users/:id', method: RequestMethod.DELETE },
             );
     }
 }

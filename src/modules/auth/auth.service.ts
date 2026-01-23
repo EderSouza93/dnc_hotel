@@ -3,19 +3,23 @@ import { JwtService } from "@nestjs/jwt";
 import { Role, User } from "@prisma/client";
 import { AuthLoginDTO } from "./domain/dto/authLogin.dto";
 import * as bcrypt from 'bcrypt';
-import { UserService } from "../users/user.service";
 import { CreateUserDTO } from "../users/domain/dto/createUser.dto";
 import { AuthRegisterDTO } from "./domain/dto/authRegisterUser.dto";
 import { AuthResetPasswordDTO } from "./domain/dto/authResetPassword.dto";
 import { ValidateTokenDTO } from "./domain/dto/validateToken.dto";
 import { MailerService } from "@nestjs-modules/mailer";
 import { templateHTML } from "./utils/templateHTML";
+import { CreateUserService } from "../users/services/createUser.service";
+import { UpdateUserService } from "../users/services/updateUser.service";
+import { FindUserByEmail } from "../users/services/findUserByEmail.service";
 
 @Injectable()
 export class AuthService {
     constructor(
         private readonly jwtService: JwtService, 
-        private readonly userService: UserService,
+        private readonly createUserService: CreateUserService,
+        private readonly updateUserService: UpdateUserService,
+        private readonly findUserByEmailService: FindUserByEmail,
         private readonly mailerService: MailerService
     ) { }
 
@@ -32,7 +36,7 @@ export class AuthService {
     }
 
     async login({ email, password }: AuthLoginDTO) {
-        const user = await this.userService.findByEmail(email);
+        const user = await this.findUserByEmailService.execute(email);
 
         if (!user || !(await bcrypt.compare(password, user.password))) {
             throw new UnauthorizedException('Email or password is incorrect');
@@ -53,7 +57,7 @@ export class AuthService {
             role: body.role ?? Role.USER,
         };
 
-        const user = await this.userService.create(newUser) 
+        const user = await this.createUserService.execute(newUser);
 
         return await this.generateJwtToken(user)
     }
@@ -63,7 +67,7 @@ export class AuthService {
 
         if (!valid || !decoded) throw new UnauthorizedException('Invalid token');
 
-        const user: User = await this.userService.update(Number(decoded.sub), { 
+        const user: User = await this.updateUserService.execute(Number(decoded.sub), { 
             password,
         });
 
@@ -71,7 +75,7 @@ export class AuthService {
     }
 
     async forgot(email: string) {
-        const user = await this.userService.findByEmail(email);
+        const user = await this.findUserByEmailService.execute(email);
 
         if (!user) {
             throw new UnauthorizedException('Email is incorrect');

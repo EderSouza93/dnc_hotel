@@ -35,7 +35,7 @@ import { ReservationsModule } from './modules/reservations/reservations.module';
 
   ],
   providers: [
-    {
+   {
       provide: 'APP_GUARD',
       useClass: ThrottlerGuard,
     }

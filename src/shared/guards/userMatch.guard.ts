@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from "@nestjs/common";
+import { CanActivate, ExecutionContext, ForbiddenException, Injectable, UnauthorizedException } from "@nestjs/common";
 
 @Injectable()
 export class UserMatchGuard implements CanActivate {
@@ -7,8 +7,12 @@ export class UserMatchGuard implements CanActivate {
         const id = request.params.id;
         const user = request.user;
 
+        if (!user || !user.id) {
+            throw new UnauthorizedException('User not found in the request.')
+        }
+
         if (user.id !== Number(id)) {
-            throw new UnauthorizedException(
+            throw new ForbiddenException(
                 'You are not allowed to perform this operation'
             );
         }
