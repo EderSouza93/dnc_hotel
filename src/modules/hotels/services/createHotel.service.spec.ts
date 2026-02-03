@@ -2,23 +2,13 @@ import { Test, TestingModule } from "@nestjs/testing"
 import { CreateHotelsService } from "./createHotel.service"
 import { REPOSITORY_TOKEN_HOTEL } from "../utils/repositoriesTokens"
 import { IHotelRepository } from "../domain/repositories/Ihotel.repositories"
+import { hotelMock } from "../utils/factory/hotelMock"
 import { REDIS_HOTEL_KEY } from "../utils/redisKey";
 
 let service: CreateHotelsService;
 let hotelRepository: IHotelRepository;
 let redis: { del: jest.Mock }
 
-const createHotelMock = {
-  id: 1,
-  name: 'Test Hotel',
-  description: 'A test hotel description',
-  image: 'test-image.jpg',
-  price: 100,
-  address: '123 Test St',
-  ownerId: 1,
-  createAt: new Date(),
-  updatedAt: new Date(),
-}
 const userIdMock = 1 
 
 describe('CreateHotelsService', () => {
@@ -29,7 +19,7 @@ describe('CreateHotelsService', () => {
         {
           provide: REPOSITORY_TOKEN_HOTEL,
           useValue: {
-            createHotel: jest.fn().mockResolvedValue(createHotelMock),
+            createHotel: jest.fn().mockResolvedValue(hotelMock),
           },
         },
         {
@@ -53,7 +43,7 @@ describe('CreateHotelsService', () => {
   it('should delete the redis key', async () => {
     const redisDelSpy = jest.spyOn(redis, 'del').mockResolvedValue(1);
 
-    await service.execute(createHotelMock, userIdMock)
+    await service.execute(hotelMock, userIdMock)
 
     expect(redisDelSpy).toHaveBeenCalledWith(REDIS_HOTEL_KEY)
   })
@@ -63,13 +53,13 @@ describe('CreateHotelsService', () => {
     //   .spyOn(hotelRepository, 'createHotel')
     //   .mockResolvedValue(createHotelMock);
 
-    const result = await service.execute(createHotelMock, userIdMock);
+    const result = await service.execute(hotelMock, userIdMock);
 
     expect(hotelRepository.createHotel).toHaveBeenCalledWith(
-      createHotelMock, 
+      hotelMock, 
       userIdMock
     )
-    expect(result).toEqual(createHotelMock)
+    expect(result).toEqual(hotelMock)
 
   })
 })

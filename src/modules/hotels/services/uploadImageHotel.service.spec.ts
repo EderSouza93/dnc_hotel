@@ -6,23 +6,21 @@ import { NotFoundException } from '@nestjs/common';
 import { stat, unlink } from 'fs/promises';
 import { join, resolve } from 'path';
 import { REDIS_HOTEL_KEY } from '../utils/redisKey';
+import { hotelMock } from '../utils/factory/hotelMock';
 
 let service: UploadImageHotelsService;
 let hotelRepository: IHotelRepository;
 let redis: { del: jest.Mock };
 
-const hotelMock = {
-  id: 1,
-  name: 'Test Hotel',
-  description: 'A test hotel description',
-  image: 'test-image.jpg',
-  price: 100,
-  address: '123 Test St',
-  ownerId: 1,
-  createdAt: new Date(),
-  updatedAt: new Date(),
-};
+const imageHotel = {
+  id: '1',
+  imageFileName: 'image.jpg'
+}
 
+const updateImageHotel = {
+  id: '1',
+  newImageFileName: 'new-image.jpg'
+}
 jest.mock('fs/promises', () => ({
   stat: jest.fn(),
   unlink: jest.fn(),
@@ -61,7 +59,7 @@ describe('UploadImageHotelService', () => {
   it('should throw NotFoundException if hotel does not exist', async () => {
     (hotelRepository.findHotelById as jest.Mock).mockResolvedValue(null);
 
-    const result = service.execute('1', 'image.jpg');
+    const result = service.execute(imageHotel.id, imageHotel.imageFileName);
 
     await expect(result).rejects.toThrow(NotFoundException);
   });
@@ -69,7 +67,7 @@ describe('UploadImageHotelService', () => {
   it('should delete existing image if it exists', async () => {
     (stat as jest.Mock).mockResolvedValue(true);
 
-    await service.execute('1', 'image.jpg');
+    await service.execute(imageHotel.id, imageHotel.imageFileName);
 
     const directory = resolve(
       __dirname,
@@ -89,21 +87,21 @@ describe('UploadImageHotelService', () => {
   it('should not throw if existing image does not exist', async () => {
     (stat as jest.Mock).mockResolvedValue(null);
 
-    await expect(service.execute('1', 'new-image.jpg')).resolves.not.toThrow();
+    await expect(service.execute(updateImageHotel.id, updateImageHotel.newImageFileName)).resolves.not.toThrow();
   });
 
   it('should update the hotel with the new image', async () => {
     (stat as jest.Mock).mockResolvedValue(true);
 
-    await service.execute('1', 'new-image.jpg');
+    await service.execute(updateImageHotel.id, updateImageHotel.newImageFileName);
 
     expect(hotelRepository.updateHotel).toHaveBeenCalledWith(1, {
-      image: 'new-image.jpg',
+      image: updateImageHotel.newImageFileName,
     });
   });
 
   it('should delete the Redis cache key', async () => {
-    await service.execute('1', 'new-image.jpg');
+    await service.execute(updateImageHotel.id, updateImageHotel.newImageFileName);
     expect(redis.del).toHaveBeenCalledWith(REDIS_HOTEL_KEY);
   });
 });
