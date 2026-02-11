@@ -6,6 +6,9 @@ import { InjectRedis } from '@nestjs-modules/ioredis';
 import { REDIS_HOTEL_KEY } from '../utils/redisKey';
 import { Hotel } from '@prisma/client';
 
+const getRedisCacheKey = (page: number, limit: number) => {
+  return `${REDIS_HOTEL_KEY}-page-${page}-limit-${limit}`
+}
 
 @Injectable()
 export class FindAllHotelsService {
@@ -18,7 +21,8 @@ export class FindAllHotelsService {
   async execute(page: number = 1, limit: number = 10) {
     const offSet = (page - 1) * limit
 
-    const dataRedis = await this.redis.get(REDIS_HOTEL_KEY)
+    const redisCacheKey = getRedisCacheKey(page, limit)
+    const dataRedis = await this.redis.get(redisCacheKey)
 
     let data = JSON.parse(dataRedis || 'null')
 
