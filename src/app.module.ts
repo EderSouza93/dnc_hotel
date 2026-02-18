@@ -7,6 +7,8 @@ import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { HotelsModule } from './modules/hotels/hotels.module';
 import { ReservationsModule } from './modules/reservations/reservations.module';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -31,11 +33,19 @@ import { ReservationsModule } from './modules/reservations/reservations.module';
       type: 'single',
       url: `redis://${process.env.REDIS_HOST}:${process.env.REDIS_PORT}`,
     }),
-    ReservationsModule,
-
+    ServeStaticModule.forRoot(
+      {
+        rootPath: join(__dirname, '..', 'uploads'),
+        serveRoot: '/user-avatar',
+      },
+      {
+        rootPath: join(__dirname, '..', 'uploads-hotel'),
+        serveRoot: '/hotel-image',
+      },
+    ),
   ],
   providers: [
-   {
+    {
       provide: 'APP_GUARD',
       useClass: ThrottlerGuard,
     }
