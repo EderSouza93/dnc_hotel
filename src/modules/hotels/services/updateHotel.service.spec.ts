@@ -1,0 +1,59 @@
+import { Test, TestingModule } from "@nestjs/testing";
+import { UpdateHotelsService } from "./updateHotel.service";
+import { REPOSITORY_TOKEN_HOTEL } from "../utils/repositoriesTokens";
+import { IHotelRepository } from "../domain/repositories/Ihotel.repositories";
+import { hotelMock } from "../utils/factory/hotelMock";
+import { REDIS_HOTEL_KEY } from "../utils/redisKey";
+
+let service: UpdateHotelsService;
+let hotelRepository: IHotelRepository;
+let redis: { del: jest.Mock };
+
+const updatedHotel = { ...hotelMock, name: 'Updated Hotel' };
+
+describe('UpdateHotelsService', () => {
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        UpdateHotelsService,
+        {
+          provide: REPOSITORY_TOKEN_HOTEL,
+          useValue: {
+            updateHotel: jest.fn().mockResolvedValue(updatedHotel),
+          },
+        },
+        {
+          provide: 'default_IORedisModuleConnectionToken',
+          useValue: {
+            del: jest.fn(),
+          },
+        },
+      ],
+    }).compile();
+
+    service = module.get<UpdateHotelsService>(UpdateHotelsService);
+    hotelRepository = module.get<IHotelRepository>(REPOSITORY_TOKEN_HOTEL);
+    redis = module.get('default_IORedisModuleConnectionToken');
+  });
+
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
+
+  it('should delete the redis key before updating', async () => {
+    const redisDelSpy = jest.spyOn(redis, 'del').mockResolvedValue(1);
+
+    await service.execute(1, { name: 'Updated Hotel' });
+
+    expect(redisDelSpy).toHaveBeenCalledWith(REDIS_HOTEL_KEY);
+  });
+
+  it('should update a hotel', async () => {
+    const updateDto = { name: 'Updated Hotel' };
+
+    const result = await service.execute(1, updateDto);
+
+    expect(hotelRepository.updateHotel).toHaveBeenCalledWith(1, updateDto);
+    expect(result).toEqual(updatedHotel);
+  });
+});

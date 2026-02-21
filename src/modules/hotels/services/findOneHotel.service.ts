@@ -7,9 +7,14 @@ export class FindOneHotelsService {
   constructor(
     @Inject(REPOSITORY_TOKEN_HOTEL)
     private readonly hotelRepository: IHotelRepository
-  ) {}
+  ) { }
 
   async execute(id: number) {
-    return await this.hotelRepository.findHotelById(id);
+    const hotel = await this.hotelRepository.findHotelById(id);
+    if (hotel && hotel.image) {
+      hotel.image = `${process.env.APP_API_URL}/hotel-image/${hotel.image}`
+    }
+    return hotel;
+
   }
 }
